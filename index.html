@@ -171,38 +171,67 @@
 
 <script>
     // ---------- CONFIGURATION ----------
-    // IMPORTANT: Replace with your Google Apps Script Web App URL (from step 2)
+    // Replace with your deployed Google Apps Script Web App URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzd9z4kPyKcXWIaI21irNWLNDai67B5Hw8sXrYEQhiPXVU_aMCQblUw6FNYLNdZR3Iu/exec";
-    
+
     // Get QR code from URL parameter ?qr=XYZ
     const urlParams = new URLSearchParams(window.location.search);
-    const qrCode = urlParams.get('qr');
-    
+    const qrCode = urlParams.get('qr') || '';
+
     let courseData = null;
     let selectedPayment = null;
+
+    // Helper: fetch from Apps Script using JSONP-safe GET with no-cors workaround
+    // Apps Script Web Apps require GET requests for CORS to work reliably.
+    // POST with application/json triggers a preflight that Apps Script blocks.
+    // We encode all data as URL params on GET requests instead.
+    async function scriptGet(params) {
+        const qs = new URLSearchParams(params).toString();
+        const url = `${APPS_SCRIPT_URL}?${qs}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache'
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+    }
 
     // Load course info based on QR code
     async function loadCourse() {
         if (!qrCode) {
-            showError("Invalid QR code. Please scan a valid SkillScan QR.");
+            document.getElementById('courseTitle').innerText = 'No QR code found';
+            showError("No QR code detected. Please scan a valid SkillScan QR code to continue.");
+            document.getElementById('payNowBtn').disabled = true;
             return;
         }
+
+        document.getElementById('qrId').innerText = qrCode;
+
         try {
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=getCourse&qr=${encodeURIComponent(qrCode)}`);
-            const data = await response.json();
+            const data = await scriptGet({ action: 'getCourse', qr: qrCode });
             if (data.success) {
                 courseData = data.course;
                 document.getElementById('courseTitle').innerText = courseData.title;
                 document.getElementById('duration').innerText = courseData.duration;
                 document.getElementById('skillType').innerText = courseData.skill_type;
                 document.getElementById('priceDisplay').innerText = courseData.price;
-                document.getElementById('qrId').innerText = qrCode;
                 document.getElementById('validity').innerText = courseData.access_days || 7;
             } else {
-                showError(data.message || "QR code expired or invalid.");
+                document.getElementById('courseTitle').innerText = 'Course not found';
+                showError(data.message || "This QR code is expired or invalid. Please get a new one.");
+                document.getElementById('payNowBtn').disabled = true;
             }
         } catch (err) {
-            showError("Network error. Please check your internet.");
+            // Distinguish network errors from script errors
+            const isOffline = !navigator.onLine;
+            showError(
+                isOffline
+                    ? "You appear to be offline. Please check your internet connection and reload."
+                    : "Could not reach the server. Make sure the Apps Script URL is deployed as a Web App (Anyone access)."
+            );
+            document.getElementById('courseTitle').innerText = 'Unable to load';
+            document.getElementById('payNowBtn').disabled = true;
         }
     }
 
@@ -214,21 +243,21 @@
             selectedPayment = radio.value;
             document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
             opt.classList.add('selected');
-        });
-        opt.querySelector('input')?.addEventListener('change', (e) => {
-            selectedPayment = e.target.value;
-            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
+            hideError();
         });
     });
 
     // Pay button
     document.getElementById('payNowBtn').addEventListener('click', async () => {
-        if (!courseData) return;
-        if (!selectedPayment) {
-            showError("Please select a payment method.");
+        if (!courseData) {
+            showError("Course data not loaded. Please reload the page.");
             return;
         }
+        if (!selectedPayment) {
+            showError("Please select a payment method first.");
+            return;
+        }
+
         const loader = document.getElementById('loader');
         const payBtn = document.getElementById('payNowBtn');
         loader.classList.add('active');
@@ -236,47 +265,47 @@
         hideError();
 
         try {
-            // Step 1: Create payment intent / record in Google Sheet
-            const initPayment = await fetch(`${APPS_SCRIPT_URL}?action=initPayment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    qr_code: qrCode,
-                    payment_method: selectedPayment,
-                    course_id: courseData.course_slug,
-                    price: courseData.price
-                })
+            // Step 1: Init payment — sent as GET params (Apps Script CORS compatible)
+            const paymentRes = await scriptGet({
+                action: 'initPayment',
+                qr_code: qrCode,
+                payment_method: selectedPayment,
+                course_id: courseData.course_slug,
+                price: courseData.price
             });
-            const paymentRes = await initPayment.json();
-            if (!paymentRes.success) throw new Error(paymentRes.message);
-            
-            // For GCash/PayMaya you'd redirect to payment provider.
-            // For MVP we simulate success + manual approval for load.
+
+            if (!paymentRes.success) throw new Error(paymentRes.message || "Payment init failed.");
+
+            // Prepaid load: show manual instructions
             if (selectedPayment === 'load') {
-                // Manual SMS: show instructions
-                alert("📲 Send exact load amount ₱" + courseData.price + " to 09XX XXX XXXX with reference: " + paymentRes.ref_code + "\n\nYou will receive access link via SMS within 1 hour.");
-                showError("After sending load, wait for SMS. Close this window?");
+                loader.classList.remove('active');
+                payBtn.disabled = false;
+                alert(
+                    "📲 Send exactly ₱" + courseData.price +
+                    " load to 09XX XXX XXXX\n" +
+                    "Reference code: " + paymentRes.ref_code +
+                    "\n\nYou will receive your access link via SMS within 1 hour."
+                );
+                showError("Waiting for load confirmation. You may close this page.");
                 return;
             }
-            
-            // Simulate GCash/PayMaya success for demo (replace with real PayMongo redirect)
-            // For production: redirect to PayMongo checkout URL
-            const confirmPayment = await fetch(`${APPS_SCRIPT_URL}?action=confirmPayment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    transaction_id: paymentRes.transaction_id,
-                    status: 'completed'
-                })
+
+            // Step 2: Confirm payment (GCash / PayMaya)
+            // In production, replace this with a redirect to PayMongo checkout URL:
+            //   window.location.href = paymentRes.checkout_url;
+            const accessData = await scriptGet({
+                action: 'confirmPayment',
+                transaction_id: paymentRes.transaction_id,
+                status: 'completed'
             });
-            const accessData = await confirmPayment.json();
+
             if (accessData.success && accessData.access_url) {
-                window.location.href = accessData.access_url; // Redirect to course (hidden YouTube/Drive)
+                window.location.href = accessData.access_url;
             } else {
-                throw new Error("Could not grant access.");
+                throw new Error(accessData.message || "Could not grant course access.");
             }
         } catch (err) {
-            showError(err.message);
+            showError(err.message || "An unexpected error occurred. Please try again.");
             loader.classList.remove('active');
             payBtn.disabled = false;
         }
