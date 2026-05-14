@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SkillScan LearnHub – Unlock Course</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f1f5f9;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 24px 20px 32px;
+            transition: all 0.2s;
+        }
+        .badge {
+            background: #eef2ff;
+            color: #1e40af;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+        .course-meta {
+            display: flex;
+            gap: 16px;
+            margin: 12px 0 16px;
+            color: #334155;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+        .price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f3b2c;
+            background: #e6f7ec;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 60px;
+            margin: 8px 0 20px;
+        }
+        .qr-info {
+            background: #f8fafc;
+            border-left: 4px solid #10b981;
+            padding: 12px 16px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .payment-option {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .payment-option.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .payment-option input {
+            width: 20px;
+            height: 20px;
+            accent-color: #10b981;
+        }
+        .pay-btn {
+            background: #0f172a;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 60px;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .pay-btn:active { transform: scale(0.97); background: #1e293b; }
+        .note {
+            font-size: 12px;
+            color: #475569;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loader.active { display: block; }
+        .error-msg {
+            color: #b91c1c;
+            background: #fee2e2;
+            border-radius: 40px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+        footer {
+            font-size: 11px;
+            text-align: center;
+            margin-top: 24px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="app">
+    <div class="badge">🎟️ QR Coupon Unlock</div>
+    <h1 id="courseTitle">Loading course...</h1>
+    <div class="course-meta">
+        <span>⏱️ <span id="duration">--</span> min</span>
+        <span>📚 <span id="skillType">--</span></span>
+    </div>
+    <div class="price">₱<span id="priceDisplay">0</span></div>
+    <div class="qr-info">
+        🔑 <strong>QR Code:</strong> <span id="qrId">---</span><br>
+        ✅ Valid for <span id="validity">7</span> days after payment
+    </div>
+
+    <div id="paymentMethods">
+        <div class="payment-option" data-method="gcash">
+            <input type="radio" name="payment" value="gcash" id="gcashRadio">
+            <label for="gcashRadio" style="flex:1; font-weight:500;">📱 GCash (instant)</label>
+        </div>
+        <div class="payment-option" data-method="paymaya">
+            <input type="radio" name="payment" value="paymaya" id="paymayaRadio">
+            <label for="paymayaRadio" style="flex:1; font-weight:500;">💳 PayMaya</label>
+        </div>
+        <div class="payment-option" data-method="load">
+            <input type="radio" name="payment" value="load" id="loadRadio">
+            <label for="loadRadio" style="flex:1; font-weight:500;">📲 Prepaid Load (SMS manual)</label>
+        </div>
+    </div>
+
+    <button class="pay-btn" id="payNowBtn">✅ PAY NOW</button>
+    <div class="loader" id="loader">⏳ Processing payment, please wait...</div>
+    <div class="error-msg" id="errorMsg"></div>
+    <footer>After payment, you'll be redirected to your course.</footer>
+</div>
+
+<script>
+    // ---------- CONFIGURATION ----------
+    // IMPORTANT: Replace with your Google Apps Script Web App URL (from step 2)
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXzb7Th-5qhVXjSQvGtgU_rSBJxfXHRaolTc2mM61vkwsVtTvoF8jzS-2_FHLipROx/exec";
+    
+    // Get QR code from URL parameter ?qr=XYZ
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrCode = urlParams.get('qr');
+    
+    let courseData = null;
+    let selectedPayment = null;
+
+    // Load course info based on QR code
+    async function loadCourse() {
+        if (!qrCode) {
+            showError("Invalid QR code. Please scan a valid SkillScan QR.");
+            return;
+        }
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=getCourse&qr=${encodeURIComponent(qrCode)}`);
+            const data = await response.json();
+            if (data.success) {
+                courseData = data.course;
+                document.getElementById('courseTitle').innerText = courseData.title;
+                document.getElementById('duration').innerText = courseData.duration;
+                document.getElementById('skillType').innerText = courseData.skill_type;
+                document.getElementById('priceDisplay').innerText = courseData.price;
+                document.getElementById('qrId').innerText = qrCode;
+                document.getElementById('validity').innerText = courseData.access_days || 7;
+            } else {
+                showError(data.message || "QR code expired or invalid.");
+            }
+        } catch (err) {
+            showError("Network error. Please check your internet.");
+        }
+    }
+
+    // Payment option selection
+    document.querySelectorAll('.payment-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const radio = opt.querySelector('input');
+            radio.checked = true;
+            selectedPayment = radio.value;
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+        });
+        opt.querySelector('input')?.addEventListener('change', (e) => {
+            selectedPayment = e.target.value;
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+        });
+    });
+
+    // Pay button
+    document.getElementById('payNowBtn').addEventListener('click', async () => {
+        if (!courseData) return;
+        if (!selectedPayment) {
+            showError("Please select a payment method.");
+            return;
+        }
+        const loader = document.getElementById('loader');
+        const payBtn = document.getElementById('payNowBtn');
+        loader.classList.add('active');
+        payBtn.disabled = true;
+        hideError();
+
+        try {
+            // Step 1: Create payment intent / record in Google Sheet
+            const initPayment = await fetch(`${APPS_SCRIPT_URL}?action=initPayment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    qr_code: qrCode,
+                    payment_method: selectedPayment,
+                    course_id: courseData.course_slug,
+                    price: courseData.price
+                })
+            });
+            const paymentRes = await initPayment.json();
+            if (!paymentRes.success) throw new Error(paymentRes.message);
+            
+            // For GCash/PayMaya you'd redirect to payment provider.
+            // For MVP we simulate success + manual approval for load.
+            if (selectedPayment === 'load') {
+                // Manual SMS: show instructions
+                alert("📲 Send exact load amount ₱" + courseData.price + " to 09XX XXX XXXX with reference: " + paymentRes.ref_code + "\n\nYou will receive access link via SMS within 1 hour.");
+                showError("After sending load, wait for SMS. Close this window?");
+                return;
+            }
+            
+            // Simulate GCash/PayMaya success for demo (replace with real PayMongo redirect)
+            // For production: redirect to PayMongo checkout URL
+            const confirmPayment = await fetch(`${APPS_SCRIPT_URL}?action=confirmPayment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    transaction_id: paymentRes.transaction_id,
+                    status: 'completed'
+                })
+            });
+            const accessData = await confirmPayment.json();
+            if (accessData.success && accessData.access_url) {
+                window.location.href = accessData.access_url; // Redirect to course (hidden YouTube/Drive)
+            } else {
+                throw new Error("Could not grant access.");
+            }
+        } catch (err) {
+            showError(err.message);
+            loader.classList.remove('active');
+            payBtn.disabled = false;
+        }
+    });
+
+    function showError(msg) {
+        const errDiv = document.getElementById('errorMsg');
+        errDiv.innerText = msg;
+        errDiv.style.display = 'block';
+    }
+    function hideError() {
+        const errDiv = document.getElementById('errorMsg');
+        errDiv.style.display = 'none';
+    }
+
+    loadCourse();
+</script>
+</body>
+</html>
