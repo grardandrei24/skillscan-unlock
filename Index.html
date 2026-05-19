@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillScan LearnHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131c;
+    --card: #1a1a28;
+    --border: #2a2a40;
+    --accent: #f0c040;
+    --accent2: #4fffb0;
+    --accent3: #ff6b6b;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --radius: 14px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: var(--accent); letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+  }
+  .logo span { color: var(--accent2); }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent); color: #0a0a0f; padding: 9px 22px;
+    border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;
+    font-family: 'Syne', sans-serif; letter-spacing: 0.3px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(240,192,64,0.35); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(240,192,64,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(79,255,176,0.1); border: 1px solid rgba(79,255,176,0.3);
+    color: var(--accent2); padding: 6px 16px; border-radius: 99px;
+    font-size: 0.78rem; font-weight: 500; margin-bottom: 28px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(2.8rem, 7vw, 5.5rem); line-height: 1.05;
+    letter-spacing: -2px; margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p {
+    max-width: 560px; color: var(--muted); font-size: 1.1rem; margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent); color: #0a0a0f; padding: 14px 32px;
+    border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-decoration: none;
+    font-family: 'Syne', sans-serif; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(240,192,64,0.4); }
+  .btn-outline {
+    background: transparent; color: var(--text); padding: 14px 32px;
+    border-radius: 10px; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+    border: 1.5px solid var(--border); cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--accent); background: rgba(240,192,64,0.06); }
+
+  /* STATS */
+  .stats {
+    display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+    padding: 50px 24px; border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.2rem;
+    color: var(--accent);
+  }
+  .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+
+  /* SECTION */
+  section { padding: 90px 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+  .section-sub { color: var(--muted); max-width: 520px; }
+
+  /* COURSE GRID */
+  .course-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 22px; margin-top: 50px;
+  }
+  .course-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    position: relative;
+  }
+  .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    border-color: var(--accent);
+  }
+  .course-thumb {
+    height: 160px; display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; position: relative; overflow: hidden;
+  }
+  .course-body { padding: 20px; }
+  .course-category {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .course-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem;
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .course-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+  .course-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 16px;
+  }
+  .course-price {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 1rem; color: var(--accent);
+  }
+  .course-actions { display: flex; gap: 8px; }
+  .btn-enroll {
+    flex: 1; background: var(--accent); color: #0a0a0f;
+    border: none; border-radius: 8px; padding: 10px 16px;
+    font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    font-family: 'Syne', sans-serif; text-decoration: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow 0.2s;
+  }
+  .btn-enroll:hover { box-shadow: 0 4px 16px rgba(240,192,64,0.4); }
+  .btn-qr {
+    background: var(--border); color: var(--text); border: none;
+    border-radius: 8px; padding: 10px 14px; cursor: pointer;
+    font-size: 0.82rem; transition: background 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-qr:hover { background: var(--accent2); color: #0a0a0f; }
+  .badge-trial {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--accent3); color: #fff; padding: 3px 10px;
+    border-radius: 99px; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge-free {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--accent2); color: #0a0a0f; padding: 3px 10px;
+    border-radius: 99px; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* QR MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px; max-width: 400px; width: 90%;
+    text-align: center; animation: popIn 0.25s ease;
+  }
+  .modal h3 {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+    margin-bottom: 6px;
+  }
+  .modal p { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+  #qr-container {
+    background: #fff; border-radius: 12px; padding: 16px;
+    display: inline-block; margin-bottom: 20px;
+  }
+  #qr-container canvas, #qr-container img { display: block; }
+  .modal-price {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .modal-close {
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--muted); padding: 10px 24px; border-radius: 8px;
+    cursor: pointer; font-size: 0.85rem;
+    transition: border-color 0.2s;
+  }
+  .modal-close:hover { border-color: var(--accent3); color: var(--accent3); }
+  .qr-instruction {
+    font-size: 0.78rem; color: var(--muted); margin-top: 8px;
+  }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px; margin-top: 50px;
+  }
+  .price-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 30px 26px;
+    position: relative; transition: transform 0.25s, border-color 0.25s;
+  }
+  .price-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .price-card.featured {
+    border-color: var(--accent); background: rgba(240,192,64,0.06);
+  }
+  .price-card.featured::before {
+    content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #0a0a0f; padding: 3px 14px;
+    border-radius: 99px; font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px;
+    font-family: 'Syne', sans-serif;
+  }
+  .price-name {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+    margin-bottom: 16px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.6rem;
+    color: var(--text); line-height: 1; margin-bottom: 6px;
+  }
+  .price-amount span { font-size: 1.1rem; color: var(--muted); }
+  .price-period { color: var(--muted); font-size: 0.82rem; margin-bottom: 24px; }
+  .price-features { list-style: none; margin-bottom: 28px; }
+  .price-features li {
+    padding: 7px 0; font-size: 0.88rem; color: var(--muted);
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+  }
+  .price-features li::before { content: '✓'; color: var(--accent2); font-weight: 700; }
+  .btn-plan {
+    width: 100%; padding: 13px; border-radius: 9px; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none;
+    transition: transform 0.2s;
+  }
+  .btn-plan:hover { transform: translateY(-1px); }
+  .btn-plan-primary { background: var(--accent); color: #0a0a0f; }
+  .btn-plan-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+
+  /* HOW IT WORKS */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-top: 50px; }
+  .step {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 22px;
+    transition: border-color 0.25s;
+  }
+  .step:hover { border-color: var(--accent2); }
+  .step-num {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.5rem;
+    color: var(--border); margin-bottom: 14px; line-height: 1;
+  }
+  .step-icon { font-size: 2rem; margin-bottom: 12px; }
+  .step h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+  .step p { color: var(--muted); font-size: 0.85rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 50px 24px 30px; text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .footer-logo span { color: var(--accent2); }
+  .footer-tagline { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  .footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { color: var(--border); font-size: 0.78rem; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* CATEGORY COLORS */
+  .cat-tech { color: #4fffb0; }
+  .cat-voc { color: #ff9f43; }
+  .cat-life { color: #a29bfe; }
+  .cat-trial { color: #ff6b6b; }
+
+  .thumb-tech { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+  .thumb-voc { background: linear-gradient(135deg, #1a0a00, #3d1c02, #7b3f00); }
+  .thumb-life { background: linear-gradient(135deg, #1a0040, #3d0066, #6a0080); }
+  .thumb-trial { background: linear-gradient(135deg, #1a0010, #440020, #8b0040); }
+
+  /* FILTER TABS */
+  .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+  .filter-tab {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    padding: 7px 18px; border-radius: 99px; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .filter-tab.active, .filter-tab:hover { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.08); }
+
+  @media (max-width: 700px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .stats { gap: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Skill<span>Scan</span> LearnHub</a>
+  <ul class="nav-links">
+    <li><a href="#courses">Courses</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#site-qr">Site QR</a></li>
+  </ul>
+  <a href="#courses" class="nav-cta">Start Learning</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">🇵🇭 Made in the Philippines · QR-Powered Learning</div>
+  <h1>Learn skills that<br/><em>actually matter.</em></h1>
+  <p>Affordable, QR coupon-based courses for students, freelancers, and community learners. Practical education without the big price tag.</p>
+  <div class="hero-actions">
+    <a href="#courses" class="btn-primary">Browse Courses</a>
+    <a href="#how" class="btn-outline">How It Works</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">₱79</div><div class="stat-label">Monthly Subscription</div></div>
+  <div class="stat"><div class="stat-num">₱20–49</div><div class="stat-label">Per QR Coupon</div></div>
+  <div class="stat"><div class="stat-num">15+</div><div class="stat-label">Courses Available</div></div>
+  <div class="stat"><div class="stat-num">3</div><div class="stat-label">Skill Categories</div></div>
+</div>
+
+<!-- COURSES -->
+<section id="courses">
+  <div class="container">
+    <div class="section-label">Course Catalog</div>
+    <div class="section-title">Explore Our Courses</div>
+    <p class="section-sub">Scan a QR coupon or subscribe to unlock any course instantly.</p>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterCourses('all', this)">All Courses</button>
+      <button class="filter-tab" onclick="filterCourses('technical', this)">Technical Skills</button>
+      <button class="filter-tab" onclick="filterCourses('vocational', this)">Vocational Skills</button>
+      <button class="filter-tab" onclick="filterCourses('life', this)">Life Skills</button>
+      <button class="filter-tab" onclick="filterCourses('trial', this)">🎁 Free Trial</button>
+    </div>
+
+    <div class="course-grid" id="course-grid"></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background: var(--surface);">
+  <div class="container">
+    <div class="section-label">Process</div>
+    <div class="section-title">How SkillScan Works</div>
+    <p class="section-sub">Simple, affordable, and designed for everyone — even with limited internet access.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">🎟️</div>
+        <div class="step-num">01</div>
+        <h4>Get a QR Coupon</h4>
+        <p>Buy a printed or digital QR coupon (₱20–₱49) from us or our distributors in your community.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">📱</div>
+        <div class="step-num">02</div>
+        <h4>Scan & Unlock</h4>
+        <p>Scan the QR code with your phone. Your course unlocks instantly — no account required for single courses.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🎓</div>
+        <div class="step-num">03</div>
+        <h4>Learn at Your Pace</h4>
+        <p>Watch lessons, complete exercises, and earn a digital badge upon course completion.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🏆</div>
+        <div class="step-num">04</div>
+        <h4>Earn Rewards</h4>
+        <p>Collect badges, refer friends for discounts, and level up with our gamification system.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <div class="section-title">Student-Friendly Plans</div>
+    <p class="section-sub">No surprise fees. No expensive equipment. Just affordable learning.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">QR Coupon</div>
+        <div class="price-amount">₱<span style="font-size:2.6rem; color:var(--text)">20</span></div>
+        <div class="price-period">per course (₱20–₱49 range)</div>
+        <ul class="price-features">
+          <li>Single course access</li>
+          <li>Lifetime access to that course</li>
+          <li>Digital completion badge</li>
+          <li>No subscription needed</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="alert('Visit a distributor near you or contact us on Facebook to get your QR Coupon!')">Get Coupon</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Monthly Pass</div>
+        <div class="price-amount">₱<span style="font-size:2.6rem; color:var(--text)">79</span></div>
+        <div class="price-period">per month, cancel anytime</div>
+        <ul class="price-features">
+          <li>Access to ALL courses</li>
+          <li>New courses every month</li>
+          <li>Priority support</li>
+          <li>Gamification badges</li>
+          <li>Referral discount rewards</li>
+        </ul>
+        <button class="btn-plan btn-plan-primary" onclick="alert('Subscription coming soon! Message us on Facebook: SkillScan LearnHub')">Subscribe Now</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Bundle Pack</div>
+        <div class="price-amount">₱<span style="font-size:2.6rem; color:var(--text)">99</span></div>
+        <div class="price-period">5 courses of your choice</div>
+        <ul class="price-features">
+          <li>5 QR coupon codes</li>
+          <li>Share with friends/family</li>
+          <li>Mix any categories</li>
+          <li>Group learning discount</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="alert('Bundle packs available! Message us on Facebook: SkillScan LearnHub')">Get Bundle</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SITE QR CODE SECTION -->
+<section id="site-qr" style="background: var(--surface); border-top: 1px solid var(--border);">
+  <div class="container" style="text-align:center;">
+    <div class="section-label">Share This Site</div>
+    <div class="section-title">Scan to Visit SkillScan LearnHub</div>
+    <p class="section-sub" style="margin: 0 auto 36px;">Once you host this page online, paste your URL below and the QR code updates instantly. Anyone who scans it goes straight to this site.</p>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+      <!-- URL input -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; width:100%; max-width:560px;">
+        <input id="site-url-input" type="url"
+          placeholder="e.g. https://skillscan.netlify.app"
+          value="https://skillscan-learnhub.pages.dev"
+          style="flex:1; min-width:240px; background:var(--card); border:1.5px solid var(--border);
+            color:var(--text); border-radius:10px; padding:12px 16px; font-size:0.9rem;
+            font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s;"
+          oninput="generateSiteQR()"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"
+        />
+        <button onclick="generateSiteQR()"
+          style="background:var(--accent); color:#0a0a0f; border:none; border-radius:10px;
+            padding:12px 22px; font-weight:700; font-size:0.88rem; cursor:pointer;
+            font-family:'Syne',sans-serif; transition:box-shadow 0.2s;"
+          onmouseover="this.style.boxShadow='0 6px 20px rgba(240,192,64,0.4)'"
+          onmouseout="this.style.boxShadow='none'"
+        >Generate QR</button>
+      </div>
+
+      <!-- QR display card -->
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:20px;
+        padding:36px; display:inline-flex; flex-direction:column; align-items:center; gap:18px;">
+
+        <div id="site-qr-box" style="background:#fff; border-radius:14px; padding:18px; display:inline-block;"></div>
+
+        <div style="text-align:center;">
+          <div style="font-family:'Syne',sans-serif; font-weight:800; font-size:1rem; margin-bottom:4px;">SkillScan LearnHub</div>
+          <div id="site-url-display" style="color:var(--muted); font-size:0.78rem; word-break:break-all; max-width:260px;"></div>
+        </div>
+
+        <button onclick="downloadSiteQR()"
+          style="background:transparent; border:1.5px solid var(--border); color:var(--muted);
+            border-radius:9px; padding:9px 22px; cursor:pointer; font-size:0.82rem;
+            transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--accent2)'; this.style.color='var(--accent2)'"
+          onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'"
+        >⬇ Download QR Code</button>
+      </div>
+
+      <p style="color:var(--muted); font-size:0.78rem; max-width:420px;">
+        💡 Tip: Host this file free on <strong style="color:var(--text)">Netlify</strong>, <strong style="color:var(--text)">GitHub Pages</strong>, or <strong style="color:var(--text)">Cloudflare Pages</strong> — then paste the URL above to get your final QR code.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Skill<span>Scan</span> LearnHub</div>
+  <div class="footer-tagline">Affordable, practical education for every Filipino learner.</div>
+  <div class="footer-links">
+    <a href="#courses">Courses</a>
+    <a href="#how">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://www.facebook.com" target="_blank">Facebook</a>
+    <a href="https://www.tiktok.com" target="_blank">TikTok</a>
+  </div>
+  <div class="footer-copy">© 2025 SkillScan LearnHub · Ceriola & Roman · Philippines · All rights reserved.</div>
+</footer>
+
+<!-- QR MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Course QR Code</h3>
+    <p id="modal-desc">Scan this code to access the course</p>
+    <div id="qr-container"></div>
+    <div class="modal-price" id="modal-price">₱49</div>
+    <p class="qr-instruction">📱 Scan with your phone camera or QR app to enroll instantly</p>
+    <br/>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+const courses = [
+  // ── TRIAL ──────────────────────────────────────────────────────────────
+  {
+    id: "trial-intro", title: "Introduction to SkillScan LearnHub",
+    desc: "A free tour of the platform — how to use QR coupons, navigate courses, and earn badges.",
+    category: "trial", price: "FREE", duration: "30 min", lessons: 3,
+    emoji: "🎁", thumb: "thumb-trial", trial: true, free: false,
+    subtopics: [
+      { title: "Welcome to SkillScan", duration: "5 min", free: true,
+        link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+      { title: "How QR Coupons Work", duration: "10 min", free: true,
+        link: "https://www.youtube.com/results?search_query=how+qr+codes+work+simple" },
+      { title: "Navigating Your Dashboard", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=online+learning+platform+tutorial" }
+    ]
+  },
+  // ── TECHNICAL ──────────────────────────────────────────────────────────
+  {
+    id: "tech-web-basics", title: "Web Development Basics",
+    desc: "Learn HTML, CSS, and basic JavaScript to build your first website from scratch.",
+    category: "technical", price: "₱49", duration: "4 hrs", lessons: 12,
+    emoji: "💻", thumb: "thumb-tech", trial: false, free: true,
+    subtopics: [
+      { title: "What is HTML?", duration: "20 min", free: true,
+        link: "https://www.w3schools.com/html/html_intro.asp" },
+      { title: "HTML Elements & Tags", duration: "25 min", free: true,
+        link: "https://www.w3schools.com/html/html_elements.asp" },
+      { title: "Introduction to CSS", duration: "30 min", free: true,
+        link: "https://www.w3schools.com/css/css_intro.asp" },
+      { title: "CSS Colors, Fonts & Spacing", duration: "25 min", free: false,
+        link: "https://www.w3schools.com/css/css_colors.asp" },
+      { title: "Building Layouts with CSS Flexbox", duration: "30 min", free: false,
+        link: "https://www.w3schools.com/css/css3_flexbox.asp" },
+      { title: "JavaScript Basics", duration: "35 min", free: false,
+        link: "https://www.w3schools.com/js/js_intro.asp" },
+      { title: "JavaScript Functions & Events", duration: "30 min", free: false,
+        link: "https://www.w3schools.com/js/js_functions.asp" },
+      { title: "Making Your Site Responsive", duration: "25 min", free: false,
+        link: "https://www.w3schools.com/html/html_responsive.asp" },
+      { title: "Publishing Your Website for Free", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=deploy+website+free+github+pages" }
+    ]
+  },
+  {
+    id: "tech-graphic-design", title: "Graphic Design with Canva",
+    desc: "Create stunning posters, social media graphics, and banners using free Canva tools.",
+    category: "technical", price: "₱39", duration: "3 hrs", lessons: 9,
+    emoji: "🎨", thumb: "thumb-tech", trial: false, free: false,
+    subtopics: [
+      { title: "Setting Up Your Free Canva Account", duration: "10 min", free: true,
+        link: "https://www.canva.com/learn/tutorials/" },
+      { title: "Understanding Design Principles", duration: "20 min", free: true,
+        link: "https://www.canva.com/learn/design-elements-principles/" },
+      { title: "Creating a Social Media Post", duration: "25 min", free: false,
+        link: "https://www.canva.com/learn/create-social-media-graphics/" },
+      { title: "Designing Flyers & Posters", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=canva+flyer+design+tutorial" },
+      { title: "Working with Typography", duration: "20 min", free: false,
+        link: "https://www.canva.com/learn/font-design/" },
+      { title: "Using Brand Kits & Color Palettes", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=canva+brand+kit+tutorial" },
+      { title: "Exporting & Sharing Your Designs", duration: "15 min", free: false,
+        link: "https://www.youtube.com/results?search_query=canva+export+share+designs" }
+    ]
+  },
+  {
+    id: "tech-spreadsheets", title: "Google Sheets for Beginners",
+    desc: "Master formulas, budgeting templates, and data tracking using Google Sheets.",
+    category: "technical", price: "₱29", duration: "2.5 hrs", lessons: 8,
+    emoji: "📊", thumb: "thumb-tech", trial: false, free: false,
+    subtopics: [
+      { title: "Getting Started with Google Sheets", duration: "15 min", free: true,
+        link: "https://support.google.com/docs/answer/6000292" },
+      { title: "Entering & Formatting Data", duration: "20 min", free: true,
+        link: "https://support.google.com/docs/answer/46973" },
+      { title: "Basic Formulas: SUM, AVERAGE, COUNT", duration: "25 min", free: false,
+        link: "https://support.google.com/docs/answer/3093318" },
+      { title: "IF Statements & Conditional Logic", duration: "25 min", free: false,
+        link: "https://support.google.com/docs/answer/3093364" },
+      { title: "Building a Personal Budget Template", duration: "30 min", free: false,
+        link: "https://www.youtube.com/results?search_query=google+sheets+budget+template+tutorial" },
+      { title: "Charts & Data Visualization", duration: "20 min", free: false,
+        link: "https://support.google.com/docs/answer/63728" },
+      { title: "Sharing & Collaborating on Sheets", duration: "15 min", free: false,
+        link: "https://support.google.com/docs/answer/2494822" }
+    ]
+  },
+  {
+    id: "tech-social-media", title: "Social Media Content Creation",
+    desc: "Create viral-worthy posts for Facebook, TikTok, and Instagram to grow your brand.",
+    category: "technical", price: "₱49", duration: "3.5 hrs", lessons: 10,
+    emoji: "📱", thumb: "thumb-tech", trial: false, free: false,
+    subtopics: [
+      { title: "Understanding Your Audience", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=how+to+find+your+target+audience+social+media" },
+      { title: "Content Planning & Calendars", duration: "25 min", free: true,
+        link: "https://www.youtube.com/results?search_query=social+media+content+calendar+tutorial" },
+      { title: "Writing Captions That Hook", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+write+social+media+captions" },
+      { title: "Facebook Page & Group Strategy", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=facebook+page+growth+strategy+2024" },
+      { title: "TikTok Short Video Creation", duration: "30 min", free: false,
+        link: "https://www.youtube.com/results?search_query=tiktok+content+creation+tutorial+beginners" },
+      { title: "Instagram Reels & Stories", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=instagram+reels+tutorial+beginners" },
+      { title: "Using Free Editing Apps (CapCut, Canva)", duration: "30 min", free: false,
+        link: "https://www.youtube.com/results?search_query=capcut+tutorial+beginner+video+editing" },
+      { title: "Growing Your Following Organically", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=grow+social+media+following+organically+free" }
+    ]
+  },
+  // ── VOCATIONAL ─────────────────────────────────────────────────────────
+  {
+    id: "voc-ukay-ukay", title: "Ukay-Ukay Business Starter",
+    desc: "How to source, price, and sell ref clothing — online and offline. Start with ₱500 capital.",
+    category: "vocational", price: "₱39", duration: "2 hrs", lessons: 6,
+    emoji: "👗", thumb: "thumb-voc", trial: false, free: false,
+    subtopics: [
+      { title: "What is Ukay-Ukay & Market Opportunity", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=ukay+ukay+business+Philippines+intro" },
+      { title: "Finding Reliable Bale Sources", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=ukay+ukay+bale+source+Philippines" },
+      { title: "Sorting, Cleaning & Pricing Items", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=ukay+ukay+sorting+pricing+tips" },
+      { title: "Selling Online via Facebook Marketplace", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=sell+online+facebook+marketplace+Philippines" },
+      { title: "Setting Up a Physical Tiangge Stall", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=tiangge+stall+setup+Philippines" },
+      { title: "Growing Your Ukay Business", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=ukay+ukay+business+growth+tips" }
+    ]
+  },
+  {
+    id: "voc-food-business", title: "Street Food Business Basics",
+    desc: "Start a profitable street food stall — costing, permits, and recipes included.",
+    category: "vocational", price: "₱49", duration: "3 hrs", lessons: 8,
+    emoji: "🍢", thumb: "thumb-voc", trial: false, free: false,
+    subtopics: [
+      { title: "Popular Street Food Ideas in PH", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=street+food+business+ideas+Philippines" },
+      { title: "Computing Your Food Cost & Profit", duration: "25 min", free: true,
+        link: "https://www.youtube.com/results?search_query=food+costing+tutorial+Philippines" },
+      { title: "Getting a Barangay Permit", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=barangay+business+permit+Philippines+guide" },
+      { title: "Setting Up Your Stall & Equipment", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=street+food+stall+setup+Philippines" },
+      { title: "Proven Filipino Street Food Recipes", duration: "30 min", free: false,
+        link: "https://www.youtube.com/results?search_query=Filipino+street+food+recipe+business" },
+      { title: "Food Safety & Hygiene Basics", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=food+safety+hygiene+Philippines+small+business" },
+      { title: "Marketing Your Food Stall on Social Media", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=market+food+business+social+media+Philippines" },
+      { title: "Scaling Up: From Stall to Paluto", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+grow+food+business+Philippines" }
+    ]
+  },
+  {
+    id: "voc-freelancing", title: "Freelancing for Beginners",
+    desc: "Land your first online job on Upwork or Fiverr — profile setup, proposals, and pricing.",
+    category: "vocational", price: "₱49", duration: "4 hrs", lessons: 11,
+    emoji: "💼", thumb: "thumb-voc", trial: false, free: false,
+    subtopics: [
+      { title: "What is Freelancing & Can You Do It?", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=freelancing+for+beginners+Philippines" },
+      { title: "Choosing Your Freelance Skill", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=what+freelance+skills+to+learn+2024" },
+      { title: "Setting Up Your Upwork Profile", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=upwork+profile+setup+tutorial+Philippines" },
+      { title: "Setting Up Your Fiverr Gig", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=fiverr+gig+setup+tutorial+beginners" },
+      { title: "Writing Proposals That Win Jobs", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=upwork+proposal+writing+tips" },
+      { title: "Pricing Your Services", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+price+freelance+services" },
+      { title: "Communicating with Clients", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=client+communication+tips+freelancer" },
+      { title: "Getting Paid: GCash, PayPal, Payoneer", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+receive+freelance+payment+Philippines" },
+      { title: "Building Your Portfolio", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+build+freelance+portfolio+no+experience" }
+    ]
+  },
+  {
+    id: "voc-repair", title: "Basic Cellphone Repair",
+    desc: "Learn screen replacement, battery swaps, and common fixes for extra income.",
+    category: "vocational", price: "₱49", duration: "3.5 hrs", lessons: 9,
+    emoji: "🔧", thumb: "thumb-voc", trial: false, free: false,
+    subtopics: [
+      { title: "Tools You Need to Start", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=cellphone+repair+tools+beginners" },
+      { title: "Understanding Phone Hardware", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=smartphone+hardware+components+explained" },
+      { title: "Screen Replacement (Android)", duration: "30 min", free: false,
+        link: "https://www.youtube.com/results?search_query=android+screen+replacement+tutorial" },
+      { title: "Battery Replacement", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=phone+battery+replacement+tutorial" },
+      { title: "Charging Port Repair", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=phone+charging+port+repair+tutorial" },
+      { title: "Software Troubleshooting & Factory Reset", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=phone+software+troubleshooting+factory+reset" },
+      { title: "Water Damage Repair", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=phone+water+damage+repair+tutorial" },
+      { title: "Pricing Repairs & Running a Shop", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=cellphone+repair+shop+business+Philippines" }
+    ]
+  },
+  // ── LIFE SKILLS ────────────────────────────────────────────────────────
+  {
+    id: "life-budgeting", title: "Personal Budgeting & Saving",
+    desc: "Learn the 50-30-20 rule, track your expenses, and start saving on any income.",
+    category: "life", price: "₱20", duration: "1.5 hrs", lessons: 5,
+    emoji: "💰", thumb: "thumb-life", trial: false, free: false,
+    subtopics: [
+      { title: "Why Budgeting Matters", duration: "10 min", free: true,
+        link: "https://www.youtube.com/results?search_query=why+budgeting+is+important+personal+finance" },
+      { title: "The 50-30-20 Rule Explained", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=50+30+20+budget+rule+explained" },
+      { title: "Tracking Your Daily Expenses", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+track+daily+expenses+Philippines" },
+      { title: "Building an Emergency Fund", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=emergency+fund+savings+Philippines+tips" },
+      { title: "Saving Strategies on a Low Income", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+save+money+low+income+Philippines" }
+    ]
+  },
+  {
+    id: "life-communication", title: "Effective Communication Skills",
+    desc: "Improve how you speak, write, and present yourself in school, work, and everyday life.",
+    category: "life", price: "₱29", duration: "2 hrs", lessons: 7,
+    emoji: "🗣️", thumb: "thumb-life", trial: false, free: false,
+    subtopics: [
+      { title: "The Basics of Effective Communication", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=effective+communication+skills+basics" },
+      { title: "Active Listening Techniques", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=active+listening+skills+practice" },
+      { title: "Speaking Confidently in Public", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=public+speaking+confidence+tips" },
+      { title: "Writing Clear Emails & Messages", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+write+professional+email+beginners" },
+      { title: "Body Language & Non-Verbal Cues", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=body+language+tips+communication" },
+      { title: "Handling Conflict & Difficult Conversations", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+handle+conflict+communication" },
+      { title: "Presenting Ideas Clearly", duration: "15 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+present+ideas+clearly+and+confidently" }
+    ]
+  },
+  {
+    id: "life-mental-health", title: "Mental Health & Stress Management",
+    desc: "Practical coping strategies, breathing techniques, and daily habits for mental wellness.",
+    category: "life", price: "₱20", duration: "1.5 hrs", lessons: 5,
+    emoji: "🧠", thumb: "thumb-life", trial: false, free: false,
+    subtopics: [
+      { title: "Understanding Mental Health", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=mental+health+awareness+basics+explained" },
+      { title: "Recognizing Stress & Burnout", duration: "20 min", free: true,
+        link: "https://www.youtube.com/results?search_query=signs+of+stress+and+burnout" },
+      { title: "Breathing & Relaxation Techniques", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=breathing+exercises+stress+relief" },
+      { title: "Building Healthy Daily Habits", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=healthy+daily+habits+mental+wellness" },
+      { title: "When & How to Seek Help", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=when+to+seek+mental+health+help+Philippines" }
+    ]
+  },
+  {
+    id: "life-resume", title: "Resume & Job Application Tips",
+    desc: "Build a job-winning resume, write cover letters, and ace your first interview.",
+    category: "life", price: "₱29", duration: "2 hrs", lessons: 6,
+    emoji: "📄", thumb: "thumb-life", trial: false, free: false,
+    subtopics: [
+      { title: "What Makes a Great Resume", duration: "15 min", free: true,
+        link: "https://www.youtube.com/results?search_query=how+to+make+a+good+resume+Philippines" },
+      { title: "Writing Your Resume Step-by-Step", duration: "30 min", free: true,
+        link: "https://www.youtube.com/results?search_query=resume+writing+tutorial+step+by+step" },
+      { title: "Free Resume Templates & Tools", duration: "15 min", free: false,
+        link: "https://www.canva.com/resumes/templates/" },
+      { title: "Writing a Cover Letter", duration: "20 min", free: false,
+        link: "https://www.youtube.com/results?search_query=how+to+write+cover+letter+Philippines" },
+      { title: "Job Interview Tips & Common Questions", duration: "25 min", free: false,
+        link: "https://www.youtube.com/results?search_query=job+interview+tips+Philippines+common+questions" },
+      { title: "Online Job Hunting Platforms", duration: "15 min", free: false,
+        link: "https://www.youtube.com/results?search_query=online+job+hunting+Philippines+2024" }
+    ]
+  }
+];
+
+// ── FILTER ──────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+function filterCourses(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderCourses();
+}
+
+// ── RENDER CARDS ─────────────────────────────────────────────────────────
+function catLabel(cat) {
+  return { technical:'Technical Skill', vocational:'Vocational Skill', trial:'Free Trial', life:'Life Skill' }[cat] || cat;
+}
+function catClass(cat) {
+  return { technical:'tech', vocational:'voc', trial:'trial', life:'life' }[cat] || 'life';
+}
+
+function renderCourses() {
+  const grid = document.getElementById('course-grid');
+  const filtered = activeFilter === 'all' ? courses : courses.filter(c => c.category === activeFilter);
+  grid.innerHTML = filtered.map(c => `
+    <div class="course-card">
+      <div class="course-thumb ${c.thumb}">${c.emoji}</div>
+      ${c.trial ? '<span class="badge-trial">FREE TRIAL</span>' : ''}
+      ${!c.trial && c.free ? '<span class="badge-free">FREE</span>' : ''}
+      <div class="course-body">
+        <div class="course-category cat-${catClass(c.category)}">${catLabel(c.category)}</div>
+        <div class="course-title">${c.title}</div>
+        <div class="course-desc">${c.desc}</div>
+        <div class="course-meta">
+          <span>⏱ ${c.duration} · ${c.lessons} lessons</span>
+          <span class="course-price">${c.price}</span>
+        </div>
+        <div class="course-actions">
+          <button class="btn-enroll" onclick="openCourse('${c.id}')">
+            ${c.trial || c.free ? '▶ Start Free' : '🎟 Enroll Now'}
+          </button>
+          <button class="btn-qr" onclick="showQR('${c.id}', '${c.title.replace(/'/g,"\\'")}', '${c.price}', '${c.subtopics[0].link}')">
+            📲 QR
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── COURSE DETAIL MODAL ──────────────────────────────────────────────────
+function openCourse(id) {
+  const c = courses.find(x => x.id === id);
+  if (!c) return;
+  const m = document.getElementById('course-modal');
+  document.getElementById('cm-emoji').textContent = c.emoji;
+  document.getElementById('cm-category').textContent = catLabel(c.category);
+  document.getElementById('cm-category').className = 'cm-cat cat-' + catClass(c.category);
+  document.getElementById('cm-title').textContent = c.title;
+  document.getElementById('cm-desc').textContent = c.desc;
+  document.getElementById('cm-meta').textContent = `⏱ ${c.duration}  ·  ${c.lessons} lessons  ·  ${c.price}`;
+
+  const list = document.getElementById('cm-subtopics');
+  list.innerHTML = c.subtopics.map((s, i) => `
+    <div class="subtopic-row">
+      <div class="subtopic-left">
+        <span class="subtopic-num">${String(i+1).padStart(2,'0')}</span>
+        <div>
+          <div class="subtopic-title">${s.title}</div>
+          <div class="subtopic-dur">⏱ ${s.duration}</div>
+        </div>
+      </div>
+      <div class="subtopic-right">
+        ${s.free
+          ? `<span class="tag-free">FREE</span>`
+          : `<span class="tag-locked">🔒 Paid</span>`}
+        <a class="subtopic-btn" href="${s.link}" target="_blank" rel="noopener">
+          ${s.free ? '▶ Watch' : '▶ Access'}
+        </a>
+      </div>
+    </div>
+  `).join('');
+
+  m.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCourseModal() {
+  document.getElementById('course-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.getElementById('course-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCourseModal();
+});
+
+// ── QR MODAL ──────────────────────────────────────────────────────────────
+function showQR(id, title, price, link) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-desc').textContent = 'Scan to access this course';
+  document.getElementById('modal-price').textContent = price;
+  document.getElementById('modal-overlay').classList.add('active');
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  try {
+    new QRCode(container, { text: link, width: 200, height: 200,
+      colorDark:"#000000", colorLight:"#ffffff", correctLevel: QRCode.CorrectLevel.H });
+  } catch(e) {
+    container.innerHTML = `<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;color:#333;font-size:0.8rem;padding:12px;text-align:center;">QR for:<br/>${link}</div>`;
+  }
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── SITE QR ───────────────────────────────────────────────────────────────
+function generateSiteQR() {
+  const input = document.getElementById('site-url-input');
+  const box = document.getElementById('site-qr-box');
+  const display = document.getElementById('site-url-display');
+  let url = input.value.trim() || 'https://skillscan-learnhub.pages.dev';
+  display.textContent = url;
+  box.innerHTML = '';
+  try {
+    new QRCode(box, { text: url, width: 220, height: 220,
+      colorDark:"#000000", colorLight:"#ffffff", correctLevel: QRCode.CorrectLevel.H });
+  } catch(e) {
+    box.innerHTML = `<div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;color:#333;font-size:0.75rem;padding:12px;text-align:center;">${url}</div>`;
+  }
+}
+function downloadSiteQR() {
+  const box = document.getElementById('site-qr-box');
+  const canvas = box.querySelector('canvas');
+  const img = box.querySelector('img');
+  const src = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
+  if (!src) { alert('QR code not ready yet.'); return; }
+  const a = document.createElement('a');
+  a.href = src; a.download = 'skillscan-learnhub-qr.png'; a.click();
+}
+window.addEventListener('load', () => { setTimeout(generateSiteQR, 300); });
+
+renderCourses();
+</script>
+<!-- COURSE DETAIL MODAL -->
+<div class="modal-overlay" id="course-modal">
+  <div class="course-modal-inner">
+    <!-- Header -->
+    <div class="cm-header">
+      <div class="cm-emoji" id="cm-emoji">💻</div>
+      <div class="cm-header-info">
+        <div class="cm-cat" id="cm-category">Technical Skill</div>
+        <h2 class="cm-title" id="cm-title">Course Title</h2>
+        <p class="cm-desc" id="cm-desc"></p>
+        <div class="cm-meta" id="cm-meta"></div>
+      </div>
+      <button class="cm-close" onclick="closeCourseModal()">✕</button>
+    </div>
+    <!-- Subtopics -->
+    <div class="cm-body">
+      <div class="cm-section-label">📚 Course Lessons</div>
+      <div id="cm-subtopics"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── COURSE MODAL ────────────────────────────────────────── */
+.course-modal-inner {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  width: 92%;
+  max-width: 680px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: popIn 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.cm-header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 30px 28px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+.cm-emoji {
+  font-size: 2.6rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 4px;
+}
+.cm-header-info { flex: 1; min-width: 0; }
+.cm-cat {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.cm-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 1.25rem; line-height: 1.25; margin-bottom: 8px;
+}
+.cm-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 10px; line-height: 1.5; }
+.cm-meta { color: var(--muted); font-size: 0.8rem; }
+.cm-close {
+  background: var(--border); border: none; color: var(--muted);
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  font-size: 0.85rem; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.cm-close:hover { background: var(--accent3); color: #fff; }
+
+.cm-body { padding: 24px 28px 28px; }
+.cm-section-label {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 16px;
+}
+
+/* Subtopic rows */
+.subtopic-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  background: var(--surface);
+  gap: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.subtopic-row:hover { border-color: var(--accent); background: rgba(240,192,64,0.04); }
+.subtopic-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.subtopic-num {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.75rem;
+  color: var(--border); flex-shrink: 0;
+}
+.subtopic-title { font-size: 0.9rem; font-weight: 500; color: var(--text); line-height: 1.3; }
+.subtopic-dur { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.subtopic-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tag-free {
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 1px;
+  background: rgba(79,255,176,0.15); color: var(--accent2);
+  padding: 3px 9px; border-radius: 99px; border: 1px solid rgba(79,255,176,0.3);
+}
+.tag-locked {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
+  color: var(--muted); background: var(--border);
+  padding: 3px 9px; border-radius: 99px;
+}
+.subtopic-btn {
+  background: var(--accent); color: #0a0a0f;
+  border: none; border-radius: 7px;
+  padding: 7px 14px; font-size: 0.78rem; font-weight: 700;
+  font-family: 'Syne', sans-serif; cursor: pointer;
+  text-decoration: none; white-space: nowrap;
+  transition: box-shadow 0.2s, transform 0.15s;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.subtopic-btn:hover {
+  box-shadow: 0 4px 14px rgba(240,192,64,0.4);
+  transform: translateY(-1px);
+}
+
+/* scrollbar inside modal */
+.course-modal-inner::-webkit-scrollbar { width: 5px; }
+.course-modal-inner::-webkit-scrollbar-track { background: transparent; }
+.course-modal-inner::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+@media (max-width: 520px) {
+  .cm-header { flex-wrap: wrap; padding: 20px 18px 16px; }
+  .cm-body { padding: 18px; }
+  .subtopic-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .subtopic-right { align-self: flex-end; }
+}
+</style>
+</body>
+</html>
